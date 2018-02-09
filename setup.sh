@@ -22,7 +22,7 @@ impala-shell -i hostname:21000 -q '
     `name` STRING)
   ROW FORMAT DELIMITED FIELDS TERMINATED BY ",";'
 
-hdfs dfs -put airlines.csv /user/hive/warehouse/airlines/
+hdfs dfs -put data/airlines.csv /user/hive/warehouse/airlines/
 
 impala-shell -i hostname:21000 -q '
   CREATE TABLE flights (
@@ -47,4 +47,4 @@ impala-shell -i hostname:21000 -q '
       time_hour TIMESTAMP)
     STORED AS PARQUET;'
 
-hdfs dfs -put flights.parquet /user/hive/warehouse/flights/
+hdfs dfs -put data/flights.parquet /user/hive/warehouse/flights/
