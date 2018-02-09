@@ -14,7 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-impala-shell -i worker-1:21000 -q '
+# Replace hostname with an impalad hostname before running
+
+impala-shell -i hostname:21000 -q '
   CREATE TABLE airlines (
     `carrier` STRING,
     `name` STRING)
@@ -22,7 +24,7 @@ impala-shell -i worker-1:21000 -q '
 
 hdfs dfs -put airlines.csv /user/hive/warehouse/airlines/
 
-impala-shell -i worker-1:21000 -q '
+impala-shell -i hostname:21000 -q '
   CREATE TABLE flights (
       year SMALLINT,
       month TINYINT,
