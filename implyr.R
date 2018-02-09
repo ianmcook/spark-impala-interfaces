@@ -13,10 +13,7 @@
 # limitations under the License.
 
 # This script requires that the Impala ODBC driver is installed on the host
-
-# Set driver name to match odbcinst.ini before running
-
-# Replace hostname with an impalad hostname before running
+# Modify .odbc.ini and .odbcinst.ini before running
 
 if(!"implyr" %in% rownames(installed.packages())) {
   install.packages("implyr")
@@ -31,9 +28,7 @@ library(implyr)
 drv <- odbc::odbc()
 impala <- src_impala(
     drv = drv,
-    driver = "Impala ODBC Driver",
-    host = "hostname",
-    port = 21050
+    dsn = "Impala DSN"
   )
 
 flights <- tbl(impala, "flights")
