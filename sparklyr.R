@@ -26,6 +26,7 @@ flights <- spark_read_parquet(
   name = "flights",
   path = "/user/hive/warehouse/flights"
 )
+
 # load by specifying name of table in metastore
 flights <- tbl(spark, "flights")
 
