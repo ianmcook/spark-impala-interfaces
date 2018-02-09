@@ -24,7 +24,7 @@ spark <- spark_connect(master = "yarn")
 flights <- spark_read_parquet(
   sc = spark,
   name = "flights",
-  path = "/user/hive/warehouse/flights"
+  path = "/user/hive/warehouse/flights/"
 )
 
 # load by specifying name of table in metastore
