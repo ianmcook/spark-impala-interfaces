@@ -18,7 +18,7 @@ if(!"sparklyr" %in% rownames(installed.packages())) {
 
 library(sparklyr)
 
-spark <- spark_connect(master = "local")
+spark <- spark_connect(master = "yarn")
 
 # load by specifying path to file in HDFS
 flights <- spark_read_parquet(
