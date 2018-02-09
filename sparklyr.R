@@ -31,6 +31,7 @@ flights <- tbl(spark, "flights")
 
 library(dplyr)
 
+# query using dplyr
 flights %>%
   filter(dest == "LAS") %>%
   group_by(origin) %>%
@@ -39,5 +40,15 @@ flights %>%
     avg_dep_delay = mean(dep_delay, na.rm = TRUE)
   ) %>%
   arrange(avg_dep_delay)
+
+# query using SQL
+tbl(spark, sql("
+  SELECT origin,
+    COUNT(*) AS num_departures,
+    AVG(dep_delay) AS avg_dep_delay
+  FROM flights
+  WHERE dest = 'LAS'
+  GROUP BY origin
+  ORDER BY avg_dep_delay"))
 
 spark_disconnect(spark)
