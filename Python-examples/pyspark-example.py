@@ -14,35 +14,35 @@
 
 from pyspark.sql import SparkSession
 
-spark = SparkSession.builder.master("yarn").getOrCreate()
+spark = SparkSession.builder.master('yarn').getOrCreate()
 
 # load by specifying path to file in HDFS
-flights = spark.read.parquet("/user/hive/warehouse/flights/")
+flights = spark.read.parquet('/user/hive/warehouse/flights/')
 
 # load by specifying name of table in metastore
-flights = spark.table("flights")
+flights = spark.table('flights')
 
 from pyspark.sql.functions import col, lit, count, mean
 
 # query using DataFrame API
 flights \
-  .filter(col("dest") == lit("LAS")) \
-  .groupBy("origin") \
+  .filter(col('dest') == lit('LAS')) \
+  .groupBy('origin') \
   .agg( \
-       count("*").alias("num_departures"), \
-       mean("dep_delay").alias("avg_dep_delay") \
+       count('*').alias('num_departures'), \
+       mean('dep_delay').alias('avg_dep_delay') \
   ) \
-  .orderBy("avg_dep_delay") \
+  .orderBy('avg_dep_delay') \
   .show()
 
 # query using SQL
-spark.sql("""
+spark.sql('''
   SELECT origin,
     COUNT(*) AS num_departures,
     AVG(dep_delay) AS avg_dep_delay
   FROM flights
   WHERE dest = 'LAS'
   GROUP BY origin
-  ORDER BY avg_dep_delay""").show()
+  ORDER BY avg_dep_delay''').show()
 
 spark.stop()
