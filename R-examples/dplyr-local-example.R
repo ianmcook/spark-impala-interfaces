@@ -21,7 +21,7 @@ if(!"dplyr" %in% rownames(installed.packages())) {
 
 library(readr)
 
-flights <- read_csv("flights.csv")
+flights <- read_csv("data/flights.csv")
 
 library(dplyr)
 

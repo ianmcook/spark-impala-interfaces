@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-flights <- read.csv("flights.csv")
+flights <- read.csv("data/flights.csv")
 
 flights_to_las <- flights[flights$dest == "LAS", ]
 flights_to_las_agg <- cbind(
