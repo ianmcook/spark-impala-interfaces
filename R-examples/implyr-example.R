@@ -22,7 +22,6 @@ if(!"odbc" %in% rownames(installed.packages())) {
   install.packages("odbc")
 }
 
-library(DBI)
 library(implyr)
 
 drv <- odbc::odbc()
