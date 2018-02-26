@@ -17,6 +17,7 @@ if(!"sparklyr" %in% rownames(installed.packages())) {
 }
 
 library(sparklyr)
+library(dplyr)
 
 spark <- spark_connect(master = "yarn")
 
@@ -29,8 +30,6 @@ flights <- spark_read_parquet(
 
 # load by specifying name of table in metastore
 flights <- tbl(spark, "flights")
-
-library(dplyr)
 
 # query using dplyr
 flights %>%
