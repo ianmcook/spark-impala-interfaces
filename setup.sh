@@ -17,15 +17,22 @@
 # Replace hostname with an impalad hostname before running
 
 impala-shell -i hostname:21000 -q '
-  CREATE TABLE airlines (
+  CREATE TABLE default.airlines (
     `carrier` STRING,
     `name` STRING)
-  ROW FORMAT DELIMITED FIELDS TERMINATED BY ",";'
+  ROW FORMAT DELIMITED FIELDS TERMINATED BY ","
+  LOCATION "hdfs:///user/hive/warehouse/airlines/";'
 
-hdfs dfs -put data/airlines.csv /user/hive/warehouse/airlines/
+airlines_empty=$(hdfs dfs -count /user/hive/warehouse/airlines/ | awk '{print $2}')
+if [[ $airlines_empty -eq 0 ]]; then
+  hdfs dfs -put data/airlines.csv /user/hive/warehouse/airlines/
+else
+  echo ERROR: /user/hive/warehouse/airlines/ is not empty
+  exit 1
+fi
 
 impala-shell -i hostname:21000 -q '
-  CREATE TABLE flights (
+  CREATE TABLE default.flights (
       year SMALLINT,
       month TINYINT,
       day TINYINT,
@@ -45,6 +52,13 @@ impala-shell -i hostname:21000 -q '
       hour TINYINT,
       minute TINYINT,
       time_hour TIMESTAMP)
-    STORED AS PARQUET;'
+    STORED AS PARQUET
+    LOCATION "hdfs:///user/hive/warehouse/flights/";'
 
-hdfs dfs -put data/flights.parquet /user/hive/warehouse/flights/
+flights_empty=$(hdfs dfs -count /user/hive/warehouse/flights/ | awk '{print $2}')
+if [[ $flights_empty -eq 0 ]]; then
+  hdfs dfs -put data/flights.parquet /user/hive/warehouse/flights/
+else
+  echo ERROR: /user/hive/warehouse/flights/ is not empty
+  exit 1
+fi
