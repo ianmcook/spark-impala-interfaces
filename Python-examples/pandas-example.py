@@ -12,13 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if sys.version_info[0] == 2:
+  raise Exception('These pandas examples require Python 3')
+else:
+  !pip3 install -U pandas
+
 import pandas as pd
 
 flights = pd.read_csv('data/flights.csv')
 
 flights \
-  .query('dest == "LAS"') \
+  .loc[flights.dest == "LAS", :] \
   .groupby('origin') \
-  .agg({'dest' : 'count', 'dep_delay' : 'mean'}) \
-  .rename(columns={'count' : 'num_departures', 'dep_delay': 'avg_dep_delay'}) \
+  .agg(
+    num_departures=('flight','count'), \
+    avg_dep_delay=('dep_delay','mean'), \
+  ) \
+  .reset_index() \
   .sort_values('avg_dep_delay')
