@@ -33,7 +33,7 @@ flights \
        mean('dep_delay').alias('avg_dep_delay') \
   ) \
   .orderBy('avg_dep_delay') \
-  .show()
+  .toPandas()
 
 # query using SQL
 spark.sql('''
@@ -43,6 +43,6 @@ spark.sql('''
   FROM flights
   WHERE dest = 'LAS'
   GROUP BY origin
-  ORDER BY avg_dep_delay''').show()
+  ORDER BY avg_dep_delay''').toPandas()
 
 spark.stop()
