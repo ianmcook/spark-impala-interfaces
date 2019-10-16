@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2018 Cloudera, Inc.
+# Copyright 2019 Cloudera, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,26 +14,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Replace hostname with an impalad hostname before running
+# Bash script to create and populate tables to demonstrate Python and R interfaces to Spark and Impala
 
-impala-shell -i hostname:21000 -q '
-  CREATE TABLE default.airlines (
-    `carrier` STRING,
-    `name` STRING)
-  ROW FORMAT DELIMITED FIELDS TERMINATED BY ","
-  LOCATION "hdfs:///user/hive/warehouse/airlines/";'
+# Change the values of these variables before running
+DEFAULT_DATABASE_NAME="default"
+DEFAULT_DATABASE_LOCATION="hdfs:///user/hive/warehouse"
+IMPALAD_HOST_PORT="hostname:21000"
 
-airlines_empty=$(hdfs dfs -count /user/hive/warehouse/airlines/ | awk '{print $2}')
-if [[ $airlines_empty -eq 0 ]]; then
-  hdfs dfs -put data/airlines.csv /user/hive/warehouse/airlines/
-else
-  echo ERROR: /user/hive/warehouse/airlines/ is not empty
-  exit 1
-fi
 
-impala-shell -i hostname:21000 -q '
-  CREATE TABLE default.flights (
-      year SMALLINT,
+put_file_if_dir_is_empty(){ # args: $1 = directory of local file, $2 = file name, $3 HDFS directory
+    dir_empty=$(hdfs dfs -count $3 | awk '{print $2}')
+  if [[ $dir_empty -eq 0 ]]; then
+    hdfs dfs -put $1/$2 $3/$2
+  else
+    echo ERROR: $3 is not empty
+    exit 1
+  fi
+}
+
+put_file_no_headers_if_dir_is_empty(){ # args: $1 = directory of local file, $2 = file name, $3 HDFS directory
+    dir_empty=$(hdfs dfs -count $3 | awk '{print $2}')
+  if [[ $dir_empty -eq 0 ]]; then
+    tail -n +2 $1/$2 | hdfs dfs -put - $3/$2
+  else
+    echo ERROR: $3 is not empty
+    exit 1
+  fi
+}
+
+
+impala-shell -i $IMPALAD_HOST_PORT --var=dbname=$DEFAULT_DATABASE_NAME --var=location=$DEFAULT_DATABASE_LOCATION -q '
+  CREATE DATABASE IF NOT EXISTS ${var:dbname} LOCATION "${var:location}";
+' || { echo ERROR: Failed to create database $DEFAULT_DATABASE_NAME ; exit 1; }
+
+
+impala-shell -i $IMPALAD_HOST_PORT --var=dbname=$DEFAULT_DATABASE_NAME --var=location=$DEFAULT_DATABASE_LOCATION -q '
+  CREATE TABLE ${var:dbname}.flights
+     (year SMALLINT,
       month TINYINT,
       day TINYINT,
       dep_time SMALLINT,
@@ -53,12 +70,25 @@ impala-shell -i hostname:21000 -q '
       minute TINYINT,
       time_hour TIMESTAMP)
     STORED AS PARQUET
-    LOCATION "hdfs:///user/hive/warehouse/flights/";'
+    LOCATION "${var:location}/flights/";
+' || { echo ERROR: Failed to create table flights in database $DEFAULT_DATABASE_NAME ; exit 1; }
 
-flights_empty=$(hdfs dfs -count /user/hive/warehouse/flights/ | awk '{print $2}')
-if [[ $flights_empty -eq 0 ]]; then
-  hdfs dfs -put data/flights.parquet /user/hive/warehouse/flights/
-else
-  echo ERROR: /user/hive/warehouse/flights/ is not empty
-  exit 1
-fi
+put_file_if_dir_is_empty data/flights flights.parquet $DEFAULT_DATABASE_LOCATION/flights
+
+impala-shell -i $IMPALAD_HOST_PORT --var=dbname=$DEFAULT_DATABASE_NAME --var=location=$DEFAULT_DATABASE_LOCATION -q '
+  CREATE TABLE ${var:dbname}.airlines
+     (carrier STRING,
+      name STRING)
+    ROW FORMAT DELIMITED
+      FIELDS TERMINATED BY ","
+      LINES TERMINATED BY "\n" 
+    STORED AS TEXTFILE
+    LOCATION "${var:location}/airlines/";
+' || { echo ERROR: Failed to create table airlines in database $DEFAULT_DATABASE_NAME ; exit 1; }
+
+put_file_no_headers_if_dir_is_empty data/airlines airlines.csv $DEFAULT_DATABASE_LOCATION/airlines
+
+impala-shell -i $IMPALAD_HOST_PORT --var=dbname=$DEFAULT_DATABASE_NAME -q '
+  REFRESH ${var:dbname}.flights;
+  REFRESH ${var:dbname}.airlines;
+' || { echo ERROR: Failed to refresh tables in database $DEFAULT_DATABASE_NAME ; exit 1; }
