@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Replace hostname with an impalad hostname before running
-
 if sys.version_info[0] == 2:
   !pip install impyla
   !pip install thrift==0.9.3
@@ -29,7 +27,7 @@ from impala.dbapi import connect
 import pandas as pd
 
 con = connect(\
-  host='hostname', \
+  host='cdsw-demo-2', \
   port=21050, \
   auth_mechanism='GSSAPI', \
   kerberos_service_name='impala' \

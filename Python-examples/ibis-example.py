@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Replace hdfs-hostname with an HDFS NameNode hostname before running
-
-# Replace impala-hostname with an impalad hostname before running
-
 if sys.version_info[0] == 2:
   !pip install impyla
   !pip install thrift_sasl
@@ -32,11 +28,11 @@ import ibis
 ibis.options.interactive = True
 
 hdfs = ibis.hdfs_connect( \
-  host='hdfs-hostname', \
+  host='cdsw-demo-1', \
   port=50070 \
 )
 con = ibis.impala.connect( \
-  host='impala-hostname', \
+  host='cdsw-demo-2', \
   port=21050, \
   hdfs_client=hdfs, \
   auth_mechanism='GSSAPI', \
