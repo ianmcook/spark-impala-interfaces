@@ -17,14 +17,23 @@
 if sys.version_info[0] == 2:
   !pip install impyla
   !pip install thrift==0.9.3
+  !pip install thrift_sasl
 else:
-  !pip3 install impyla
-  !pip3 install thrift
+  !pip3 install impyla==0.15.0
+  !pip3 install sasl==0.2.1
+  !pip3 install thrift_sasl==0.2.1
+  !pip3 install thriftpy==0.3.9
+  !pip3 install thriftpy2==0.4.0
 
 from impala.dbapi import connect
 import pandas as pd
 
-con = connect(host='hostname', port=21050)
+con = connect(\
+  host='hostname', \
+  port=21050, \
+  auth_mechanism='GSSAPI', \
+  kerberos_service_name='impala' \
+)
 
 sql = ''' 
   SELECT origin,

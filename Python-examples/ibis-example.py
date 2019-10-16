@@ -18,16 +18,30 @@
 
 if sys.version_info[0] == 2:
   !pip install impyla
+  !pip install thrift_sasl
   !pip install ibis-framework[impala]
 else:
-  !pip3 install impyla
+  !pip3 install impyla==0.15.0
+  !pip3 install sasl==0.2.1
+  !pip3 install thrift_sasl==0.2.1
+  !pip3 install thriftpy==0.3.9
+  !pip3 install thriftpy2==0.4.0
   !pip3 install ibis-framework[impala]
 
 import ibis
 ibis.options.interactive = True
 
-hdfs = ibis.hdfs_connect(host='hdfs-hostname', port=50070)
-con = ibis.impala.connect(host='impala-hostname', port=21050, hdfs_client=hdfs)
+hdfs = ibis.hdfs_connect( \
+  host='hdfs-hostname', \
+  port=50070 \
+)
+con = ibis.impala.connect( \
+  host='impala-hostname', \
+  port=21050, \
+  hdfs_client=hdfs, \
+  auth_mechanism='GSSAPI', \
+  kerberos_service_name='impala' \
+)
 
 flights = con.table('flights')
 
